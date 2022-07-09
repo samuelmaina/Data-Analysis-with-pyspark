@@ -38,3 +38,69 @@ def readDataInDf(file):
     return spark.read.csv(file, header=True)
 
 df = readDataInDf('example.csv')
+
+
+
+
+columns=[]
+for col in df.dtypes:
+    columns.append(col[0])
+
+
+    
+
+#question 1
+
+#the duration that will be added to the different dates.
+#done globally to save on time since doing it in the increase_time_by_8_hours function
+#takes time calling  timedelta function.
+addition= datetime.timedelta(hours=8)
+
+def increase_time_by_8_hours(row):
+    #object that will be return by the function. This will be used to create a new dataframe.
+    result={}
+
+    #copy the prexisting into result
+    for col in columns:
+        result[col]=row[col]
+
+    #the timestamp that contains the year, month, day , hour, minutes and seconds each contain in the six indices
+    #of the ts array.
+    ts= row.Date.split('-') + row.Time.split(':')
+    
+    #the parsed time_stamp which a datetime object that can be manipulated as time in python.
+    time_stamp= datetime.datetime(int(ts[0]),int(ts[1]),int(ts[2]),int(ts[3]),int(ts[4]),int(ts[5]))
+    
+    #the beijing_time
+    beijing_time= time_stamp+ addition
+
+    #add the Date and time to the result.
+    result['Date']=beijing_time.strftime("%Y-%m-%d")
+    result['Time']= beijing_time.strftime("%H:%M:%S")
+
+    #starting time for the time stamp.
+    date_1 = '30/12/1899 00:00:00'
+    
+    date_format_str = '%d/%m/%Y %H:%M:%S'
+    start = datetime.datetime.strptime(date_1, date_format_str)
+    # Get the interval between two datetimes as timedelta object
+    diff = beijing_time - start
+  
+    #results are supposed to be stored as number of days(with their fractional parts). The total_seconds return
+    #a float hence the division will be float division hence no trancation yielding to fractional parts.
+    diff_in_days = diff.total_seconds()/no_of_sec_per_day
+   
+    #store the results of the time stamp in the result
+    result['Timestamp']=diff_in_days
+    return result   
+
+
+
+
+#create a RDD that is going to be transformed by our lambda function above. The map function can not be 
+#called directly on the dataframe.
+rdd2=df.rdd.map(lambda x: increase_time_by_8_hours(x))
+ 
+#convert the RDD to Dataframe
+df2=rdd2.toDF()
+df2.show(5)
