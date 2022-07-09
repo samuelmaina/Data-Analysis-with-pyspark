@@ -31,3 +31,10 @@ def createSparkSession():
     conf = pyspark.SparkConf().set("spark.executor.instances", 4)
     return SparkSession.builder.master(f"local[{no_of_cores}]").config(conf=conf).appName("Big Data Analysis").getOrCreate()
 
+sparkEnvConfig()
+spark=createSparkSession()
+
+def readDataInDf(file):
+    return spark.read.csv(file, header=True)
+
+df = readDataInDf('example.csv')
