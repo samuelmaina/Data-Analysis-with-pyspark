@@ -104,3 +104,24 @@ rdd2=df.rdd.map(lambda x: increase_time_by_8_hours(x))
 #convert the RDD to Dataframe
 df2=rdd2.toDF()
 df2.show(5)
+
+
+
+# # question 2
+# #create a temporary view for sql querying. I have choosen to use sql queries to perform querying.
+df2.createOrReplaceTempView("df_view")
+
+
+# group the data by UserID and order the Data according to the number of each rows each userID has.
+# the query should only return only the UserID, and the their day count.
+df3= spark.sql(
+    """
+    SELECT UserID, COUNT(DISTINCT Date) AS Days
+    FROM df_view
+    GROUP BY UserID
+    ORDER BY Days DESC
+    """
+)
+
+print("User IDs and Days for which data was recorded")
+df3.show(5)
