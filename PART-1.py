@@ -183,7 +183,6 @@ def dist(long_x, lat_x, long_y, lat_y):
 
     distance = R * c
     return distance
-
 df6= df2.withColumn("Distance", dist(
     "Longitude", "Latitude",
     lag("Longitude", 1).over(w), lag("Latitude", 1).over(w)
