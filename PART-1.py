@@ -1,8 +1,12 @@
-import os, sys
+import os, sys,datetime
 
 from pyspark.sql import SparkSession
 import pyspark
+from pyspark.sql.functions  import lag, cos, sin, lit, toRadians, atan2, sqrt, sum
+from pyspark.sql.window import Window
 
+
+no_of_sec_per_day= 24*3600
 
 def sparkEnvConfig():
     #downlaod zipped file from https://github.com/srccodes/hadoop-common-2.2.0-bin/archive/master.zip ,extract it 
@@ -152,7 +156,36 @@ df5= spark.sql(
     """
 )
 
-print(" The first 5 User IDs and their longest difference in time stamps ")
+print("The first 5 User IDs and their longest difference in time stamps ")
 df5.show(5)
 
+
+
+
+# question 6
+
+w = Window().partitionBy("UserID").orderBy("Timestamp")
+
+
+
+def dist(long_x, lat_x, long_y, lat_y): 
+    R=lit(6371.0)
+    lat1 = toRadians(lat_x)
+    lon1 = toRadians(long_x)
+    lat2 = toRadians(lat_y)
+    lon2 = toRadians(long_y)
+
+    dlon = lon2 - lon1
+    dlat = lat2 - lat1
+
+    a = sin(dlat / 2)**2 + cos(lat1) * cos(lat2) * sin(dlon / 2)**2
+    c = 2 * atan2(sqrt(a), sqrt(1 - a))
+
+    distance = R * c
+    return distance
+
+df6= df2.withColumn("Distance", dist(
+    "Longitude", "Latitude",
+    lag("Longitude", 1).over(w), lag("Latitude", 1).over(w)
+).alias("Distance"))
 
