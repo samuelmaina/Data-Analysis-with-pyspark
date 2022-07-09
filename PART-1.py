@@ -142,4 +142,17 @@ print("User_ID and the days they had over 100 data points");
 #display all the rows
 df4.show(df4.count(), False)
 
+# question 5
+df5= spark.sql(
+    """
+    SELECT UserID, MAX(Timestamp) - MIN(Timestamp) AS diff
+    FROM df_view
+    GROUP BY UserID 
+    ORDER BY diff DESC
+    """
+)
+
+print(" The first 5 User IDs and their longest difference in time stamps ")
+df5.show(5)
+
 
