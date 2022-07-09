@@ -1,5 +1,8 @@
 import os, sys
 
+from pyspark.sql import SparkSession
+import pyspark
+
 
 def sparkEnvConfig():
     #downlaod zipped file from https://github.com/srccodes/hadoop-common-2.2.0-bin/archive/master.zip ,extract it 
@@ -23,3 +26,8 @@ def sparkEnvConfig():
     sys.path.append(util_path)
     sys.path.append(java_path)
     sys.path.append(python_path)
+    
+def createSparkSession():
+    conf = pyspark.SparkConf().set("spark.executor.instances", 4)
+    return SparkSession.builder.master(f"local[{no_of_cores}]").config(conf=conf).appName("Big Data Analysis").getOrCreate()
+
