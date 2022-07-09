@@ -125,3 +125,21 @@ df3= spark.sql(
 
 print("User IDs and Days for which data was recorded")
 df3.show(5)
+
+
+df4= spark.sql(
+    """
+    SELECT UserID, COUNT(*) AS Day_with_more_than_100_data_points
+    FROM (SELECT UserID
+          FROM df_view
+          GROUP BY UserID, Date
+          HAVING COUNT(*)>100)
+    GROUP BY UserID
+    """
+)
+
+print("User_ID and the days they had over 100 data points");
+#display all the rows
+df4.show(df4.count(), False)
+
+
