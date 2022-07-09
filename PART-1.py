@@ -188,3 +188,35 @@ df6= df2.withColumn("Distance", dist(
     lag("Longitude", 1).over(w), lag("Latitude", 1).over(w)
 ).alias("Distance"))
 
+
+#create a new view from the df that has distance added to it.
+
+df6.createOrReplaceTempView("df_view")
+
+
+df7= spark.sql(
+    """
+      WITH distance_per_day (UserID,Date, distance)  AS 
+                            (SELECT UserID,Date,SUM(Distance) AS distance
+                            FROM df_view
+                            GROUP BY UserID,Date)        
+      SELECT distance_per_day.UserID,MIN(distance_per_day.Date) AS earliest_date ,longest_distances.max_distance AS longest_distance
+      FROM distance_per_day,( SELECT UserID,MAX(distance) AS max_distance
+                    FROM distance_per_day
+                    GROUP BY UserID) AS longest_distances
+      WHERE longest_distances.UserID= distance_per_day.UserID AND distance_per_day.distance=longest_distances.max_distance
+      GROUP BY distance_per_day.UserID,longest_distances.max_distance
+    """
+)
+
+
+
+print("Users and the earliest day theys they travelled the most. ")
+df7.show(df7.count(), False)
+
+
+# # solution gotten from https://stackoverflow.com/questions/47812526/pyspark-sum-a-column-in-dataframe-and-return-results-as-int
+total_distance = df6.groupBy().sum().collect()[0][1]
+print(total_distance)
+
+
