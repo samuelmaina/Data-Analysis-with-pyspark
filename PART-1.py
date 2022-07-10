@@ -9,7 +9,7 @@ from pyspark.sql.window import Window
 no_of_sec_per_day= 24*3600
 
 
-cores= os.cpu_count()
+no_of_cores= os.cpu_count()
 
 
 def sparkEnvConfig():
@@ -32,7 +32,8 @@ def sparkEnvConfig():
     
 def createSparkSession():
     conf = pyspark.SparkConf().set("spark.executor.instances", 4)
-    return SparkSession.builder.master(f"local[{cores}]").config(conf=conf).appName("Big Data Analysis").getOrCreate()
+    return SparkSession.builder.master(f"local[{no_of_cores
+}]").config(conf=conf).appName("Big Data Analysis").getOrCreate()
 
 sparkEnvConfig()
 spark=createSparkSession()
